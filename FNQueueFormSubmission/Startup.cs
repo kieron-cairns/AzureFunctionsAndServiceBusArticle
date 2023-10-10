@@ -31,8 +31,8 @@ namespace FNQueueFormSubmission
             builder.Services.AddSingleton<IAzureKeyVaultWrapper>(sp =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
-                string keyVaultUrl = config[":"];
-                string clientSecretId = config[":"];
+                string keyVaultUrl = config["AzureKeyVaultConfig:KVUrl"];
+                string clientSecretId = config["AzureKeyVaultConfig:KVServiceBusConnectionString"];
 
                 var clientSecretCredential = new DefaultAzureCredential();
                 var secretClient = new SecretClient(new Uri(keyVaultUrl), clientSecretCredential);
