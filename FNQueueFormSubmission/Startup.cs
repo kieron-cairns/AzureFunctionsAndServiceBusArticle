@@ -1,4 +1,8 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using FNQueueFormSubmission.Interfaces.UtilityInterfaces;
+using FNQueueFormSubmission.Utilities;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -27,8 +31,8 @@ namespace FNQueueFormSubmission
             builder.Services.AddSingleton<IAzureKeyVaultWrapper>(sp =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
-                string keyVaultUrl = config["AzureKeyVaultConfig:KVUrl"];
-                string clientSecretId = config["AzureKeyVaultConfig:KVSecretClientValue"];
+                string keyVaultUrl = config[":"];
+                string clientSecretId = config[":"];
 
                 var clientSecretCredential = new DefaultAzureCredential();
                 var secretClient = new SecretClient(new Uri(keyVaultUrl), clientSecretCredential);

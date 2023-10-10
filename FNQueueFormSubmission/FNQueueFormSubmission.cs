@@ -12,7 +12,7 @@ namespace FNQueueFormSubmission
 {
     public class FNQueueFormSubmission
     {
-        [FunctionName("QueueFormSubmission")]
+        [FunctionName("FNQueueFormSubmission")]
         public async Task<IActionResult> Run(
          [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
          [ServiceBus("form-submissions", Connection = "ServiceBusConnectionString")] IAsyncCollector<string> collector,
