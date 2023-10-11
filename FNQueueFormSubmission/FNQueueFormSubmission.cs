@@ -38,11 +38,6 @@ namespace FNQueueFormSubmission
 
         private async Task<string> GetKeyVaultSecret(string keyVaultSecretName)
         {
-            //var keyVaultClient = new SecretClient(new Uri($"https://{keyVaultName}.vault.azure.net/"), new DefaultAzureCredential());
-
-            // Setup a listener to monitor logged events.
-            //using AzureEventSourceListener listener = AzureEventSourceListener.CreateConsoleLogger();
-
             var secret = await _azureSecretClientWrapper.GetSecretAsync(keyVaultSecretName);
 
             return secret;
