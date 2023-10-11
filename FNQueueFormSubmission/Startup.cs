@@ -3,7 +3,10 @@ using Azure.Security.KeyVault.Secrets;
 using FNQueueFormSubmission.Interfaces.UtilityInterfaces;
 using FNQueueFormSubmission.Utilities;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.AzureKeyVault;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -40,6 +43,21 @@ namespace FNQueueFormSubmission
             });
 
             builder.Services.AddSingleton<IAzureSecretClientWrapper, AzureSecretClientWrapper>();
+        }
+
+        public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
+        {
+            var builtConfig = builder.ConfigurationBuilder.Build();
+
+            var keyVaultEndpoint = builtConfig["AzureKeyVaultConfig:KVUrl"];
+            if (!string.IsNullOrEmpty(keyVaultEndpoint))
+            {
+                var azureServiceTokenProvider = new AzureServiceTokenProvider();
+                var keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
+
+                builder.ConfigurationBuilder
+                    .AddAzureKeyVault(keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager());
+            }
         }
     }
 }
