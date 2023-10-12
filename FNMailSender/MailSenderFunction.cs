@@ -31,7 +31,7 @@ namespace FNMailSender
 
         [FunctionName("FNMailSender")]
         public async Task Run(
-        [ServiceBusTrigger("sb-brightbyte-queue", Connection = "ServiceBusConnectionString")] string formData, ILogger log)
+        [ServiceBusTrigger("mail-queue", Connection = "ServiceBusConnectionString")] string formData, ILogger log)
         {
             log.LogInformation("Starting SendEmail function...");
 
@@ -41,7 +41,7 @@ namespace FNMailSender
 
             try
             {
-                string accountEmail = "hello@brightbyte.uk";
+                string accountEmail = "hello@test.co.uk";
                 dynamic data = JsonConvert.DeserializeObject(formData);
 
                 string senderName = data?.name;
@@ -60,21 +60,15 @@ namespace FNMailSender
                 log.LogInformation(sendGridKey);
                 log.LogInformation(keyVaultSecretName);
 
-                //var client = new SendGridClient(sendGridKey);
-
-                //var client = new SendGridServiceWrapper(sendGridKey);
 
                 var from = new EmailAddress(accountEmail, senderName);
                 var subject = "Contact Form Submission";
-                var to = new EmailAddress(accountEmail, "Kieron Cairns");
+                var to = new EmailAddress(accountEmail, "Test Name");
                 var plainTextContent = message;
 
                 var htmlContent = $"<p>{message}</p><h2>Contact Info: </h2><storng>Name: {senderName}</strong><storng>Email: {senderEmail}</strong><storng>Phone: {senderPhone}</strong>";
 
-                log.LogInformation($"Preparing to send email from {senderEmail} to hello@brightbyte.uk...");
-
-                //var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
-                //var msg = _sendGridServiceWrapper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                log.LogInformation($"Preparing to send email from {senderEmail} to hello@test.co.uk...");
 
                 try
                 {
