@@ -27,7 +27,7 @@ namespace FNQueueFormSubmission
         [FunctionName("FNQueueFormSubmission")]
         public async Task<IActionResult> Run(
          [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
-         [ServiceBus("sb-brightbyte-queue", Connection = "ServiceBusConnectionString")] IAsyncCollector<string> collector,
+         [ServiceBus("mail-queue", Connection = "ServiceBusConnectionString")] IAsyncCollector<string> collector,
          ILogger log)
         {
 
