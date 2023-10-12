@@ -57,14 +57,11 @@ namespace FNMailSenderTests
             // Mock Azure Secret client wrapper
             _mockAzureSecretClientWrapper.Setup(x => x.GetSecretAsync(It.IsAny<string>())).ReturnsAsync("YourSecretAPIKey");
 
-            // Create the function instance
-            var function = new MailSenderFunction(_mockConfigurationWrapper.Object, _mockAzureSecretClientWrapper.Object, _mockSendGridServiceWrapper.Object);
-
             // Setup form data
             var formData = formDataMock;
 
             // Act
-            await function.Run(formData, _mockLogger.Object);
+            await _function.Run(formData, _mockLogger.Object);
 
             // Assert
             _mockSendGridServiceWrapper.Verify(wrapper => wrapper.SendEmailAsync(It.IsAny<EmailAddress>(), It.IsAny<EmailAddress>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once());
