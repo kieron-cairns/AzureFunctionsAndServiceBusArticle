@@ -22,65 +22,67 @@ namespace FNReCaptchaVerification
         private readonly IJsonConvertWrapper _jsonConvertWrapper;
         private readonly IStreamReaderWrapper _streamReaderWrapper;
         private readonly IHttpRequestWrapper _httpRequestWrapper;
+        private readonly ICaptchaVerificationService _captchaVerificationService;
 
-        public FNReCaptchaVerify(IConfiguration config, IHttpClientWrapper httpClientWrapper, IJsonConvertWrapper jsonConvertWrapper, IStreamReaderWrapper streamReaderWrapper, IHttpRequestWrapper httpRequestWrapper)
+        public FNReCaptchaVerify(IConfiguration config, IHttpClientWrapper httpClientWrapper, IJsonConvertWrapper jsonConvertWrapper, IStreamReaderWrapper streamReaderWrapper, IHttpRequestWrapper httpRequestWrapper, ICaptchaVerificationService captchaVerificationService)
         {
             _config = config;
             _httpClientWrapper = httpClientWrapper;
             _jsonConvertWrapper = jsonConvertWrapper;
             _streamReaderWrapper = streamReaderWrapper;
             _httpRequestWrapper = httpRequestWrapper;
+            _captchaVerificationService = captchaVerificationService;   
         }
 
         [FunctionName("FNReCaptchaVerify")]
         public async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] IHttpRequestWrapper req, [ServiceBus("sb-brightbyte-queue", Connection = "ServiceBusConnectionString")] string formData, IAsyncCollectorWrapper<string> collector,
-        ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            var streamReaderWrapper = new StreamReaderWrapper(req.Body);
-            string requestBody = await streamReaderWrapper.ReadToEndAsync(); dynamic data = _jsonConvertWrapper.DeserializeObject<dynamic>(requestBody);
-            string captchaValue = data?.captchaValue;
-
-            if (string.IsNullOrEmpty(captchaValue))
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] IHttpRequestWrapper req,
+          [ServiceBus("mail-queue", Connection = "ServiceBusConnectionString")] string formData,
+          IAsyncCollectorWrapper<string> collector,
+          ILogger log)
             {
-                return new BadRequestObjectResult("Please pass a captchaValue in the request body");
-            }
+                log.LogInformation("C# HTTP trigger function processed a request.");
 
-            var keyVaultSecretName = _config["AzureKeyVaultConfig:KVSecretName"];
-            log.LogInformation($"KVSecretName: {keyVaultSecretName}");
+                // Read the request body
+                var streamReaderWrapper = new StreamReaderWrapper(req.Body);
+                string requestBody = await streamReaderWrapper.ReadToEndAsync();
+                dynamic data = _jsonConvertWrapper.DeserializeObject<dynamic>(requestBody);
+                string captchaValue = data?.captchaValue;
 
-            string recaptchaSecretKey = "ConfigHere";
-
-            var verificationURL = $"https://www.google.com/recaptcha/api/siteverify?secret={recaptchaSecretKey}&response={captchaValue}";
-
-            var verificationResponse = await _httpClientWrapper.PostAsync(verificationURL, null);
-            var verificationContent = await verificationResponse.Content.ReadAsStringAsync();
-
-            _httpRequestWrapper.AddResponseHeader("Access-Control-Allow-Origin", "*");
-            _httpRequestWrapper.AddResponseHeader("Access-Control-Allow-Methods", "GET, POST");
-            _httpRequestWrapper.AddResponseHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-            log.LogInformation($"Verification Response: {verificationContent}");
-
-            if (verificationContent.Contains("\"success\": true"))
-            {
-                try
+                if (string.IsNullOrEmpty(captchaValue))
                 {
-                    await collector.AddAsync(formData);
-                    return new OkObjectResult(new { success = true, msg = "Captcha verification passed & added to service bus verification queue." });
+                    return new BadRequestObjectResult("Please pass a captchaValue in the request body");
                 }
-                catch (Exception ex)
+
+                var keyVaultSecretName = _config["AzureKeyVaultConfig:KVSecretName"];
+                log.LogInformation($"KVSecretName: {keyVaultSecretName}");
+
+                string recaptchaSecretKey = "ConfigHere";  // This should probably be fetched securely, not hardcoded
+
+                // Utilizing the ICaptchaVerificationService to verify captcha
+                var isCaptchaVerified = await _captchaVerificationService.VerifyCaptchaAsync(captchaValue);
+
+                _httpRequestWrapper.AddResponseHeader("Access-Control-Allow-Origin", "*");
+                _httpRequestWrapper.AddResponseHeader("Access-Control-Allow-Methods", "GET, POST");
+                _httpRequestWrapper.AddResponseHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+                if (isCaptchaVerified)
                 {
-                    log.LogError($"Failed to add formData to the service bus. Error: {ex.Message}");
-                    return new ObjectResult(new { success = false, msg = "Captcha verification passed, but an error occurred while adding to the service bus verification queue." }) { StatusCode = (int)HttpStatusCode.InternalServerError };
+                    try
+                    {
+                        await collector.AddAsync(formData);
+                        return new OkObjectResult(new { success = true, msg = "Captcha verification passed & added to service bus verification queue." });
+                    }
+                    catch (Exception ex)
+                    {
+                        log.LogError($"Failed to add formData to the service bus. Error: {ex.Message}");
+                        return new ObjectResult(new { success = false, msg = "Captcha verification passed, but an error occurred while adding to the service bus verification queue." }) { StatusCode = (int)HttpStatusCode.InternalServerError };
+                    }
                 }
-            }
-            else
-            {
-                return new UnauthorizedObjectResult(new { success = false, msg = "Captcha verification failed." });
+                else
+                {
+                    return new UnauthorizedObjectResult(new { success = false, msg = "Captcha verification failed." });
+                }
             }
         }
     }
-}
