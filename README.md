@@ -12,4 +12,4 @@ Dive deep into TDD practices with Azure Functions and Service Bus, emphasizing t
 
 ---
 
-This captures the essence and focuses on the primary technical details relevant for a GitHub Repository readme.
+Stay tuned: We're currently working on a comprehensive blog post that will delve deep into the Azure services setup and our unique code implementation strategies. Expect it to be published soon!
