@@ -30,10 +30,33 @@ namespace FNQueueFormSubmission
          [ServiceBus("sb-brightbyte-queue", Connection = "ServiceBusConnectionString")] IAsyncCollector<string> collector,
          ILogger log)
         {
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            await collector.AddAsync(requestBody); // Queue the data to Service Bus
 
-            return new OkObjectResult("Form submission received and is being processed.");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+
+            try
+            {
+                await collector.AddAsync(requestBody); // Queue the data to Service Bus
+                return new OkObjectResult("Form submission received and is being processed.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if you have a logging mechanism
+                log.LogError(ex, "An error occurred while adding the message to the queue.");
+
+                // Return a user-friendly error message
+                return new ObjectResult(new
+                {
+                    status = 500,
+                    error = ex
+                })
+                {
+                    StatusCode = 500
+                };
+            }
         }
 
         private async Task<string> GetKeyVaultSecret(string keyVaultSecretName)
