@@ -52,7 +52,6 @@ namespace FNReCaptchaVerificationTests
         public async Task Run_ValidCaptcha_ReturnsOkResult()
         {
            
-
             // Mock the captcha verification to return true
             _mockCaptchaVerificationService.Setup(service => service.VerifyCaptchaAsync(It.IsAny<string>()))
                 .ReturnsAsync(true);
