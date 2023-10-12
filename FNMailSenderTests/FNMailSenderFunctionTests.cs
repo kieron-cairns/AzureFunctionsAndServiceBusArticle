@@ -92,81 +92,47 @@ namespace FNMailSenderTests
         }
 
 
-        [Fact]
-        public async Task TestMethod2()
-        {
 
-            var mockSendGridClient = new Mock<ISendGridClient>();
-
-
-            mockSendGridClient.Setup(client => client.SendEmailAsync(It.IsAny<SendGridMessage>(), It.IsAny<CancellationToken>()))
-                       .ReturnsAsync(new Response(HttpStatusCode.Accepted, null, null));
-
-            var mockSendGridServiceWrapper = new SendGridServiceWrapper("YourSecretAPIKey", mockSendGridClient.Object);
-
-            var mockLogger = new Mock<ILogger>();
-            var mockConfigurationWrapper = new Mock<IConfigurationWrapper>();
-            mockConfigurationWrapper.Setup(x => x["AzureKeyVaultConfig:KVSecretName"]).Returns("YourKeyValue");
-
-            var mockAzureSecretClientWrapper = new Mock<IAzureSecretClientWrapper>();
-            mockAzureSecretClientWrapper.Setup(x => x.GetSecretAsync(It.IsAny<string>())).ReturnsAsync("YourSecretAPIKey");
-
-            var function = new MailSenderFunction(mockConfigurationWrapper.Object, mockAzureSecretClientWrapper.Object, mockSendGridServiceWrapper);
-
-            var formData = formDataMock;
-
-            await function.Run(formData, mockLogger.Object);
-
-            mockLogger.Verify(log => log.Log(LogLevel.Information, It.IsAny<EventId>(), It.Is<object>(state => state.ToString().Contains("Email sent successfully!")), null, It.IsAny<Func<object, Exception, string>>()), Times.Once);
-
-        }
 
         [Fact]
         public async Task TestEmailSendsSuccessfully()
         {
+            // Arrange
+
+            // Mock SendGrid client
+            var mockSendGridClient = new Mock<ISendGridClient>();
+            mockSendGridClient.Setup(client => client.SendEmailAsync(It.IsAny<SendGridMessage>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Response(HttpStatusCode.Accepted, null, null));
+
+            // Setup SendGrid service wrapper
+            var mockSendGridServiceWrapper = new SendGridServiceWrapper("YourSecretAPIKey", mockSendGridClient.Object);
+
+            // Mock Logger
+            var mockLogger = new Mock<ILogger>();
+
+            // Mock Configuration wrapper
             var mockConfigurationWrapper = new Mock<IConfigurationWrapper>();
             mockConfigurationWrapper.Setup(x => x["AzureKeyVaultConfig:KVSecretName"]).Returns("YourKeyValue");
 
+            // Mock Azure Secret client wrapper
             var mockAzureSecretClientWrapper = new Mock<IAzureSecretClientWrapper>();
             mockAzureSecretClientWrapper.Setup(x => x.GetSecretAsync(It.IsAny<string>())).ReturnsAsync("YourSecretAPIKey");
 
-            //var mockSendGridServiceWrapper = new Mock<ISendGridServiceWrapper>();
-
-            var mockSendGridClient = new Mock<ISendGridClient>();
-            mockSendGridClient.Setup(x => x.SendEmailAsync(It.IsAny<SendGridMessage>(), It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(new Response(HttpStatusCode.Accepted, null, null));
-
-
-            var mockSendGridServiceWrapper = new SendGridServiceWrapper("YourSecretAPIKey", mockSendGridClient.Object);
-
-
-            var mockLogger = new Mock<ILogger>();
-
-
-            // Now, create your function or service class, and invoke the actual method you want to test.
+            // Create the function instance
             var function = new MailSenderFunction(mockConfigurationWrapper.Object, mockAzureSecretClientWrapper.Object, mockSendGridServiceWrapper);
 
+            // Setup form data
             var formData = formDataMock;
 
-            // If you have a method you want to test, call it here and see if the test passes.
-
-            var logMessages = new List<string>();
-            mockLogger.Setup(x => x.Log(It.IsAny<LogLevel>(), It.IsAny<EventId>(), It.IsAny<object>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()))
-                      .Callback<LogLevel, EventId, object, Exception, Func<object, Exception, string>>((logLevel, eventId, state, exception, formatter) =>
-                      {
-                          logMessages.Add(state.ToString());
-                      });
-
-            // ... [rest of the test]
-
-
+            // Act
 
             await function.Run(formData, mockLogger.Object);
+
+            // Assert
+
             mockLogger.Verify(log => log.Log(LogLevel.Information, It.IsAny<EventId>(), It.Is<object>(state => state.ToString().Contains("Email sent successfully!")), null, It.IsAny<Func<object, Exception, string>>()), Times.Once);
-
-            Assert.True(logMessages.Any(message => message.Contains("Email sent successfully!")), "Expected log message was not found.");
-
         }
+
 
 
 
