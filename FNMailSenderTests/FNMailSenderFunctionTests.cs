@@ -85,15 +85,14 @@ namespace FNMailSenderTests
             var mockSendGridServiceWrapper = new SendGridServiceWrapper("YourSecretAPIKey", _mockSendGridClient.Object);
 
             // Mock Configuration wrapper
-            var mockConfigurationWrapper = new Mock<IConfigurationWrapper>();
-            mockConfigurationWrapper.Setup(x => x["AzureKeyVaultConfig:KVSecretName"]).Returns("YourKeyValue");
+            _mockConfigurationWrapper.Setup(x => x["AzureKeyVaultConfig:KVSecretName"]).Returns("YourKeyValue");
 
             // Mock Azure Secret client wrapper
             var mockAzureSecretClientWrapper = new Mock<IAzureSecretClientWrapper>();
             mockAzureSecretClientWrapper.Setup(x => x.GetSecretAsync(It.IsAny<string>())).ReturnsAsync("YourSecretAPIKey");
 
             // Create the function instance
-            var function = new MailSenderFunction(mockConfigurationWrapper.Object, mockAzureSecretClientWrapper.Object, mockSendGridServiceWrapper);
+            var function = new MailSenderFunction(_mockConfigurationWrapper.Object, mockAzureSecretClientWrapper.Object, mockSendGridServiceWrapper);
 
             // Setup form data
             var formData = formDataMock;
