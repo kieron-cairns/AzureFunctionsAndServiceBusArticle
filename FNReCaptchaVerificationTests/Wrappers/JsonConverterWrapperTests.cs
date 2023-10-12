@@ -10,49 +10,49 @@ using System.Threading.Tasks;
 
 namespace FNReCaptchaVerificationTests.Wrappers
 {
-    public  class JsonConverterWrapperTests
+    using Moq;
+    using Xunit;
+
+    public class JsonConvertWrapperTests
     {
-        private  Mock<IJsonConvertWrapper> _jsonConvertWrapper;
-
-        public JsonConverterWrapperTests()
+        [Fact]
+        public void SerializeObject_GivenObject_ReturnsExpectedSerializedString()
         {
-            _jsonConvertWrapper = new Mock<IJsonConvertWrapper>();
+            // Arrange
+            var mockConverter = new Mock<IJsonConverter>();
+            var testObject = new { Name = "John", Age = 25 };
+            var expectedSerialization = "{\"Name\":\"John\",\"Age\":25}";
+
+            mockConverter.Setup(s => s.SerializeObject(It.IsAny<object>())).Returns(expectedSerialization);
+
+            var wrapper = new JsonConvertWrapper(mockConverter.Object);
+
+            // Act
+            var serializedResult = wrapper.SerializeObject(testObject);
+
+            // Assert
+            Assert.Equal(expectedSerialization, serializedResult);
         }
 
         [Fact]
-        public void DeserializeObject_ReturnsCorrectObject()
+        public void DeserializeObject_GivenSerializedString_ReturnsExpectedDeserializedObject()
         {
-            //var jsonString = "{\"Name\":\"John\", \"Age\":30}";
+            // Arrange
+            var mockConverter = new Mock<IJsonConverter>();
+            var serializedString = "{\"Name\":\"John\",\"Age\":25}";
+            var expectedDeserialization = new TestModel { Name = "John", Age = 25 };
 
-            //var result = _jsonConvertWrapper.DeserializeObject<TestModel>(jsonString);
+            mockConverter.Setup(s => s.DeserializeObject<TestModel>(It.IsAny<string>())).Returns(expectedDeserialization);
 
-            //Assert.Equal("John", result.Name);
-            //Assert.Equal(30, result.Age);
+            var wrapper = new JsonConvertWrapper(mockConverter.Object);
 
-            var jsonString = "{\"Name\":\"John\", \"Age\":30}";
-            var testObject = new TestModel
-            {
-                Name = "John",
-                Age = 30
-            };
+            // Act
+            var deserializedResult = wrapper.DeserializeObject<TestModel>(serializedString);
 
-            _jsonConvertWrapper.Setup(jcw => jcw.DeserializeObject<TestModel>(jsonString)).Returns(testObject);
+            // Assert
+            Assert.Equal(expectedDeserialization.Name, deserializedResult.Name);
+            Assert.Equal(expectedDeserialization.Age, deserializedResult.Age);
         }
-
-        [Fact]
-        public void SerializeObject_ReturnsCorrectString()
-        {
-            var testObject = new TestModel
-            {
-                Name = "John",
-                Age = 30
-            };
-
-            //var result = _jsonConvertWrapper.SerializeObject(testObject);
-
-            //Assert.Equal("{\"Name\":\"John\",\"Age\":30}", result);
-
-        }
-
     }
+
 }
