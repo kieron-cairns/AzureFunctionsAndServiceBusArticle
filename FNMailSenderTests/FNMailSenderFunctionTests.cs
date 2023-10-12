@@ -42,7 +42,7 @@ namespace FNMailSenderTests
         }
 
         [Fact]
-        public async Task TestSendGridSuccessfullEmailSend()
+        public async Task TestEmailSendsSuccessfully()
         {
             // Arrange
 
@@ -68,7 +68,7 @@ namespace FNMailSenderTests
         }
 
         [Fact]
-        public async Task TestEmailSendFails()
+        public async Task TestEmailSendsUnsuccessfully()
         {
             // Arrange
             Response capturedResponse = null;
