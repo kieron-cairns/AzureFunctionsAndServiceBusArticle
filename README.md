@@ -1,6 +1,6 @@
 <h1>Azure Service Bus: Powering Scalability and Reusability in Modern Cloud Solutions</h1>
 <br>
-In the evolving realm of cloud-native apps, scalable and reusable components are crucial. Azure Service Bus, a fully managed message broker from Microsoft Azure, excels at connecting disparate services like Azure Functions. Leveraging the Azure Service Bus with Azure Functions enhances scalability and decoupling—each function can scale based on its own demand. For instance, instead of integrating reCAPTCHA verification in every function, centralize it in a single Azure Function for standardized, reduced redundancy.
+In the evolving realm of cloud-native apps, scalable and reusable components are crucial. Azure Service Bus, a fully managed message broker from Microsoft Azure, excels at connecting disparate services like Azure Functions. Leveraging the Azure Service Bus with Azure Functions enhances scalability and decoupling allowing each function to scale based on its own demand. For instance, instead of integrating reCAPTCHA verification in every function, centralise it in a single Azure Function for standardized, reduced redundancy.
 
 In this repository:
 
