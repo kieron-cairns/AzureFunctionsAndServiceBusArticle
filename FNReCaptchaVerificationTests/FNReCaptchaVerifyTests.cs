@@ -19,6 +19,26 @@ namespace FNReCaptchaVerificationTests
 {
     public class FNReCaptchaVerifyTests
     {
+        private readonly Mock<IConfiguration> _mockConfig;
+        private readonly Mock<IHttpClientWrapper> _mockHttpClientWrapper;
+        private readonly Mock<IJsonConvertWrapper> _mockJsonConvertWrapper;
+        private readonly Mock<IStreamReaderWrapper> _mockStreamReaderWrapper;
+        private readonly Mock<IHttpRequestWrapper> _mockHttpRequestWrapper;
+        private readonly Mock<ICaptchaVerificationService> _mockCaptchaVerificationService;
+        private readonly Mock<IAsyncCollectorWrapper<string>> _mockCollector;
+        private readonly Mock<ILogger> _mockLogger;
+
+        public FNReCaptchaVerifyTests()
+        {
+            _mockConfig = new Mock<IConfiguration>();
+            _mockHttpClientWrapper = new Mock<IHttpClientWrapper>();
+            _mockJsonConvertWrapper = new Mock<IJsonConvertWrapper>();
+            _mockStreamReaderWrapper = new Mock<IStreamReaderWrapper>();
+            _mockHttpRequestWrapper = new Mock<IHttpRequestWrapper>();
+            _mockCaptchaVerificationService = new Mock<ICaptchaVerificationService>();
+            _mockCollector = new Mock<IAsyncCollectorWrapper<string>>();
+            _mockLogger = new Mock<ILogger>();
+        }
 
         private readonly string formDataMock = @"
         {
@@ -31,54 +51,44 @@ namespace FNReCaptchaVerificationTests
         [Fact]
         public async Task Run_ValidCaptcha_ReturnsOkResult()
         {
-            // Arrange
-            var mockConfig = new Mock<IConfiguration>();
-            var mockHttpClientWrapper = new Mock<IHttpClientWrapper>();
-            var mockJsonConvertWrapper = new Mock<IJsonConvertWrapper>();
-            var mockStreamReaderWrapper = new Mock<IStreamReaderWrapper>();
-            var mockHttpRequestWrapper = new Mock<IHttpRequestWrapper>();
-            var mockCaptchaVerificationService = new Mock<ICaptchaVerificationService>();
-            var mockCollector = new Mock<IAsyncCollectorWrapper<string>>();
-            var mockLogger = new Mock<ILogger>();
+           
 
             // Mock the captcha verification to return true
-            mockCaptchaVerificationService.Setup(service => service.VerifyCaptchaAsync(It.IsAny<string>()))
+            _mockCaptchaVerificationService.Setup(service => service.VerifyCaptchaAsync(It.IsAny<string>()))
                 .ReturnsAsync(true);
 
             // Setup for AddAsync method
-            mockCollector.Setup(c => c.AddAsync(It.IsAny<string>()))
+            _mockCollector.Setup(c => c.AddAsync(It.IsAny<string>()))
                          .Returns(Task.CompletedTask);
 
             // Setup for FlushAsync method
-            mockCollector.Setup(c => c.FlushAsync(It.IsAny<CancellationToken>()))
+            _mockCollector.Setup(c => c.FlushAsync(It.IsAny<CancellationToken>()))
                          .Returns(Task.CompletedTask);
 
             // Mock the JsonConvertWrapper to return the captchaValue from formDataMock
             dynamic mockData = new ExpandoObject();
             mockData.captchaValue = "validCaptcha";
-            mockJsonConvertWrapper.Setup(json => json.DeserializeObject<dynamic>(It.IsAny<string>()))
+            _mockJsonConvertWrapper.Setup(json => json.DeserializeObject<dynamic>(It.IsAny<string>()))
                                   .Returns(mockData);
 
             // Mocking the StreamReaderWrapper's ReadToEndAsync method
-            mockStreamReaderWrapper.Setup(sr => sr.ReadToEndAsync())
+            _mockStreamReaderWrapper.Setup(sr => sr.ReadToEndAsync())
                                    .ReturnsAsync("{\"captchaValue\":\"validCaptcha\"}");
 
             // Mocking the HttpRequestWrapper's Body property
-            mockHttpRequestWrapper.Setup(req => req.Body)
+            _mockHttpRequestWrapper.Setup(req => req.Body)
                                   .Returns(new MemoryStream());
 
             var fnReCaptchaVerify = new FNReCaptchaVerify(
-                mockConfig.Object,
-                mockHttpClientWrapper.Object,
-                mockJsonConvertWrapper.Object,
-                mockStreamReaderWrapper.Object,
-                mockHttpRequestWrapper.Object,
-                mockCaptchaVerificationService.Object);
+                _mockConfig.Object,
+                _mockHttpClientWrapper.Object,
+                _mockJsonConvertWrapper.Object,
+                _mockStreamReaderWrapper.Object,
+                _mockHttpRequestWrapper.Object,
+                _mockCaptchaVerificationService.Object);
 
             // Act
-            var result = await fnReCaptchaVerify.Run(mockHttpRequestWrapper.Object, formDataMock, mockCollector.Object, mockLogger.Object);
-
-            // ... [rest of the test]
+            var result = await fnReCaptchaVerify.Run(_mockHttpRequestWrapper.Object, formDataMock, _mockCollector.Object, _mockLogger.Object);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -90,5 +100,4 @@ namespace FNReCaptchaVerificationTests
             Assert.Equal("Captcha verification passed & added to service bus verification queue.", (string)value.msg);
         }
     }
-
 }
