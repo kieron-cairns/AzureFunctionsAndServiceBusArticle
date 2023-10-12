@@ -12,8 +12,6 @@ using Xunit;
 
 namespace FNMailSenderTests
 {
-
-
     public class FNMailSenderFunctionTests
     {
         private Mock<IAzureSecretClientWrapper> _mockAzureSecretClientWrapper;
