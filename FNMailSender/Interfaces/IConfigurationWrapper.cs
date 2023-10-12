@@ -9,6 +9,8 @@ namespace FNMailSender.Interfaces
     public interface IConfigurationWrapper
     {
         string GetValue(string key);
+        string this[string key] { get; }
+
     }
 
 }

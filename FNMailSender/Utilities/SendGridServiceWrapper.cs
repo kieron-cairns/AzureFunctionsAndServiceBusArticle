@@ -23,6 +23,26 @@ namespace FNMailSender.Utilities
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             return await _client.SendEmailAsync(msg);
         }
+
+        public SendGridMessage CreateSingleEmail(EmailAddress from, EmailAddress to, string subject, string plainTextContent, string htmlContent)
+        {
+            SendGridMessage sendGridMessage = new SendGridMessage();
+            sendGridMessage.SetFrom(from);
+            sendGridMessage.SetSubject(subject);
+
+            if (!string.IsNullOrEmpty(plainTextContent))
+            {
+                sendGridMessage.AddContent(MimeType.Text, plainTextContent);
+            }
+
+            if (!string.IsNullOrEmpty(htmlContent))
+            {
+                sendGridMessage.AddContent(MimeType.Html, htmlContent);
+            }
+
+            sendGridMessage.AddTo(to);
+            return sendGridMessage;
+        }
     }
 
 }

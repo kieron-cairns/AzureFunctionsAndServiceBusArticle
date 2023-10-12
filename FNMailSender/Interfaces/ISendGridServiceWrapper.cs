@@ -11,6 +11,8 @@ namespace FNMailSender.Interfaces
     public interface ISendGridServiceWrapper
     {
         Task<Response> SendEmailAsync(EmailAddress from, EmailAddress to, string subject, string plainTextContent, string htmlContent);
+        SendGridMessage CreateSingleEmail(EmailAddress from, EmailAddress to, string subject, string plainTextContent, string htmlContent);
+
     }
 
 }

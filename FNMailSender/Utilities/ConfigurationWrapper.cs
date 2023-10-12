@@ -17,11 +17,12 @@ namespace FNMailSender.Utilities
             _configuration = configuration;
         }
 
+        public string this[string key] => _configuration[key];
+
+
         public string GetValue(string key)
         {
             return _configuration[key];
         }
-
-        // Implement other necessary methods from IConfiguration as required
     }
 }
