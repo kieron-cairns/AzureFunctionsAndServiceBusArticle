@@ -5,7 +5,7 @@ namespace DatabaseSaverWebAPI.Interfaces
 {
     public interface IFormSubmissionContext
     {
-        DbSet<FormSubmission> QueryHistories { get; }
+        DbSet<FormSubmission> FormSubmissions { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
