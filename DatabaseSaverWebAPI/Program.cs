@@ -1,4 +1,5 @@
 using Azure.Identity;
+using DatabaseSaverWebAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,8 @@ else
 {
     logger.LogInformation("SQL connection string retrieval error");
 }
+
+builder.Services.AddDbContext<FormSubmissionContext>(options => options.)
 
     builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
