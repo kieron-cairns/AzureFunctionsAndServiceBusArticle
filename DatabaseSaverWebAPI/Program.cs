@@ -23,7 +23,18 @@ else
     logger.LogInformation("KeyVault URL not found in config");
 }
 
-builder.Services.AddControllers();
+var sqlConnectionString = Environment.GetEnvironmentVariable("KVSecretName");
+if (!string.IsNullOrEmpty(sqlConnectionString))
+{
+
+    logger.LogInformation("SQL connection string retrieved");
+}
+else 
+{
+    logger.LogInformation("SQL connection string retrieval error");
+}
+
+    builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
