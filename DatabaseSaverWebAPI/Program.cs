@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using DatabaseSaverWebAPI.Data;
+using DatabaseSaverWebAPI.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,7 @@ else
 }
 
 // Get SQL Connection String from Key Vault
-string secretName = Environment.GetEnvironmentVariable("KVSecretName") ?? "YourSecretName"; // Replace "YourSecretName" with the name of your secret if it's not in an environment variable
+string secretName = Environment.GetEnvironmentVariable("KVSecretName") ?? "SQLServerConnectionString"; // Replace "YourSecretName" with the name of your secret if it's not in an environment variable
 
 var secretClient = new SecretClient(new Uri(keyVaultUrl), new DefaultAzureCredential());
 string sqlConnectionString = secretClient.GetSecret(secretName).Value.Value;
@@ -36,8 +37,11 @@ else
 {
     logger.LogInformation("SQL connection string retrieval error from Key Vault.");
 }
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<FormSubmissionContext>(options => options.UseSqlServer(sqlConnectionString));
+builder.Services.AddScoped<IFormRepository, FormRepository>();
+builder.Services.AddScoped<IFormSubmissionContext, FormSubmissionContext>();
+
 
 builder.Services.AddControllers();
 
