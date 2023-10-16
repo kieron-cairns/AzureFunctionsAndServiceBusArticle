@@ -1,13 +1,26 @@
+using Azure.Identity;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-var keyVaultUrl = builder.Configuration["KVUrl"];
+// var keyVaultUrl = builder.Configuration["KVURL"];
+
+var keyVaultUrl = Environment.GetEnvironmentVariable("KVURL");
+
+var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
 
 if(!string.IsNullOrEmpty(keyVaultUrl))
 {
+
+    logger.LogInformation("$KeyVaultUrl URL retrieved!");
+
     var credential = new DefaultAzureCredential();
-    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUrl), credential)
+    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUrl), credential);
+}
+else
+{
+    logger.LogInformation("KeyVault URL not found in config");
 }
 
 builder.Services.AddControllers();
