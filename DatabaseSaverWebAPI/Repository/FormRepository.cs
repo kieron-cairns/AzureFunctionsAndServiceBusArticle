@@ -8,10 +8,12 @@ using Microsoft.Extensions.Logging;
 public class FormRepository : IFormRepository
 {
     private readonly IFormSubmissionContext _submissionContext;
+    private readonly ILogger _logger;
 
-    public FormRepository(IFormSubmissionContext submissionContext)
+    public FormRepository(IFormSubmissionContext submissionContext, ILogger logger)
     {
         _submissionContext = submissionContext;
+        _logger = logger;
     }
 
     public async Task AddContactFormEntryAsync(FormSubmission entry)
@@ -23,8 +25,7 @@ public class FormRepository : IFormRepository
         }
         catch(Exception ex) {
 
-            Console.WriteLine(ex.ToString());
-
+            _logger.LogError($"An error occurred while adding a contact form entry within the repository method: {ex.Message}");
         }
     }
 }

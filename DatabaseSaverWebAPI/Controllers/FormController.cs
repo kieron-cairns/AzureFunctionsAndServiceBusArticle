@@ -8,10 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 public class FormController : ControllerBase
 {
     private readonly IFormRepository _repository;
+    private readonly ILogger<FormController> _logger;
 
-    public FormController(IFormRepository repository)
+    public FormController(IFormRepository repository, ILogger<FormController> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
     [HttpPost("/PostContactFormEntry")]
@@ -23,7 +25,7 @@ public class FormController : ControllerBase
         }
         catch (Exception ex)
         {
-
+            _logger.LogError($"An error occurred while adding a contact form entry within the controller method: {ex.Message}");
         }
 
         return StatusCode(200);

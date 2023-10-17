@@ -6,7 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure logging
+
 var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
+
+builder.Logging.AddConsole();  
+builder.Logging.AddDebug();
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
 
 // Get the Key Vault URL
 var keyVaultUrl = Environment.GetEnvironmentVariable("KVURL");
