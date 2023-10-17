@@ -8,9 +8,9 @@ using Microsoft.Extensions.Logging;
 public class FormRepository : IFormRepository
 {
     private readonly IFormSubmissionContext _submissionContext;
-    private readonly ILogger _logger;
+    private readonly ILogger<FormRepository> _logger;
 
-    public FormRepository(IFormSubmissionContext submissionContext, ILogger logger)
+    public FormRepository(IFormSubmissionContext submissionContext, ILogger<FormRepository> logger)
     {
         _submissionContext = submissionContext;
         _logger = logger;
