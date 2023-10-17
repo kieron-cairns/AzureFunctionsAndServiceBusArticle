@@ -30,11 +30,4 @@ public class FormController : ControllerBase
 
         return StatusCode(200);
     }
-
-    // Dummy method to represent the "location" URL after creation.
-    // You might want to create a proper GET method if needed.
-    private IActionResult GetContactFormEntryById(Guid id)
-    {
-        return NoContent();
-    }
 }
