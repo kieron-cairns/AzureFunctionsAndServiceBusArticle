@@ -35,48 +35,5 @@ namespace DatabaseSaverWebAPITests
             mockSet.Verify(m => m.Add(It.IsAny<FormSubmission>()), Times.Once());
             mockContext.Verify(m => m.SaveChangesAsync(default), Times.Once());
         }
-
-        [Fact]
-        public async Task AddContactFormEntryAsync_WhenExceptionOccurs_LoggerReceivesError()
-        {
-            // Arrange
-            var mockSet = new Mock<DbSet<FormSubmission>>();
-
-            var mockContext = new Mock<IFormSubmissionContext>();
-            mockContext.Setup(m => m.FormSubmissions).Returns(mockSet.Object);
-            mockContext.Setup(m => m.SaveChangesAsync(default)).Throws(new Exception("Test exception"));
-
-            var mockLogger = new Mock<ILogger<FormRepository>>();
-            mockLogger.Setup(
-                logger => logger.Log(
-                    LogLevel.Error,
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsAnyType>(),
-                    It.IsAny<Exception>(),
-                    (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()
-                )
-            );
-
-            var repository = new FormRepository(mockContext.Object, mockLogger.Object);
-
-            var formSubmission = new FormSubmission();
-
-            // Act
-            await repository.AddContactFormEntryAsync(formSubmission);
-
-            // Assert
-            mockLogger.Verify(
-                logger => logger.Log(
-                    LogLevel.Error,
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsAnyType>(),
-                    It.IsAny<Exception>(),
-                    (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()
-                ),
-                Times.Once
-            );
-        }
-
     }
-
 }

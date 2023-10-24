@@ -29,39 +29,55 @@ namespace DatabaseSaverWebAPITests
             Assert.Equal(200, statusCodeResult.StatusCode);
         }
 
+      
         [Fact]
-        public async Task PostContactFormEntry_RepositoryThrowsError_LoggerReceivesError()
+        public async Task PostContactFormEntry_DuplicatePrimaryKey_LogsError()
         {
             // Arrange
-            var mockSet = new Mock<DbSet<FormSubmission>>();
+            var mockRepository = new Mock<IFormRepository>();
+            var mockLogger = new Mock<ILogger<FormController>>();
+            var controller = new FormController(mockRepository.Object, mockLogger.Object);
 
-            var mockContext = new Mock<IFormSubmissionContext>();
-            mockContext.Setup(m => m.FormSubmissions).Returns(mockSet.Object);
-            mockContext.Setup(m => m.SaveChangesAsync(default)).Throws(new Exception("Test exception"));
+            var duplicateGuid = Guid.NewGuid();
+            var duplicateDateTime = DateTime.UtcNow;
 
-            var mockLogger = new Mock<ILogger<FormRepository>>();
+            var entry = new FormSubmission
+            {
+                // Initialize the entry with the necessary properties
+                Id = duplicateGuid,
+                Name = "string",
+                Email = "user@example.com",
+                Phone = "string",
+                Message = "string",
+                Submitted = duplicateDateTime,
+                IsContactFormSubmit = true,
+                IsNewsLetterSubmit = false
+            };
 
-            // Setup for the underlying Log method that the LogError extension calls
-            mockLogger.Setup(
+            mockRepository
+                .Setup(r => r.AddContactFormEntryAsync(It.IsAny<FormSubmission>()))
+                .ThrowsAsync(new DuplicatePrimaryKeyException("Violation of PRIMARY KEY constraint 'PK_FormSubmissions'. Cannot insert duplicate key in object 'dbo.FormSubmissions'. The duplicate key value is (3fa85f64-5717-4562-b3fc-2c963f66afa6)."));
+
+            // Act
+            var result = await controller.PostContactFormEntry(entry);
+
+            // Assert
+            mockLogger.Verify(
                 l => l.Log(
                     LogLevel.Error,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => true),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("An error occurred while adding a contact form entry within the controller method")),
                     It.IsAny<Exception>(),
-                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)
-                )
-            ).Verifiable();
+                    It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                Times.Once);
 
-            var repository = new FormRepository(mockContext.Object, mockLogger.Object);
-
-            var formSubmission = new FormSubmission();
-
-            // Act
-            await repository.AddContactFormEntryAsync(formSubmission);
-
-            // Assert
-            mockLogger.Verify();
         }
+    }
+}
 
+public class DuplicatePrimaryKeyException : Exception
+{
+    public DuplicatePrimaryKeyException(string message) : base(message)
+    {
     }
 }
