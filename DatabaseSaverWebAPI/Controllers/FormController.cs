@@ -21,13 +21,13 @@ public class FormController : ControllerBase
     {
         try
         {
-           await _repository.AddContactFormEntryAsync(entry);
+            await _repository.AddContactFormEntryAsync(entry);
+            return StatusCode(200); 
         }
         catch (Exception ex)
         {
             _logger.LogError($"An error occurred while adding a contact form entry within the controller method: {ex.Message}");
+            return StatusCode(500, "An error occurred while processing your request:" );
         }
-
-        return StatusCode(200);
     }
 }

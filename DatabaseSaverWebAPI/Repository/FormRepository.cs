@@ -18,14 +18,7 @@ public class FormRepository : IFormRepository
 
     public async Task AddContactFormEntryAsync(FormSubmission entry)
     {
-        try
-        {
-            _submissionContext.FormSubmissions.Add(entry);
-            await _submissionContext.SaveChangesAsync();
-        }
-        catch(Exception ex) {
-
-            _logger.LogError($"An error occurred while adding a contact form entry within the repository method: {ex.Message}");
-        }
+        _submissionContext.FormSubmissions.Add(entry);
+        await _submissionContext.SaveChangesAsync();
     }
 }
