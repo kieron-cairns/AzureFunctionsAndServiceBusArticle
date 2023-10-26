@@ -19,6 +19,11 @@ public class FormController : ControllerBase
     [HttpPost("/PostContactFormEntry")]
     public async Task<IActionResult> PostContactFormEntry([FromBody] FormSubmission entry)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         try
         {
             await _repository.AddContactFormEntryAsync(entry);
