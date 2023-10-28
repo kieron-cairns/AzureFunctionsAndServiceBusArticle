@@ -57,6 +57,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.WebHost.UseSetting("https_port", "5000");
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -83,6 +86,8 @@ builder.WebHost.ConfigureKestrel(options =>
 
 if (app.Environment.IsDevelopment())
 {
+    logger.LogInformation("App is in development environmnet");
+
     app.UseDeveloperExceptionPage();
 }
 else
@@ -93,6 +98,8 @@ else
         {
             context.Response.StatusCode = 500;
             context.Response.ContentType = "text/html";
+
+            logger.LogInformation("App is in production environmnet");
 
             var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
             if (exceptionHandlerPathFeature != null)
