@@ -59,6 +59,14 @@ builder.Services.AddSwaggerGen();
 
 builder.WebHost.UseSetting("https_port", "5000");
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder
+            .WithOrigins("http://109.152.33.208/", "http://109.152.33.208/")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 
 var app = builder.Build();
 
