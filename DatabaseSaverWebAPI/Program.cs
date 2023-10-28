@@ -59,16 +59,15 @@ builder.Services.AddSwaggerGen();
 
 builder.WebHost.UseSetting("https_port", "5000");
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSpecificOrigin",
-        builder => builder
-            .WithOrigins("http://109.152.33.208/", "http://109.152.33.208/")
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-});
+builder.Services.AddCors();
+
 
 var app = builder.Build();
+
+app.UseCors(builder => builder
+    .WithOrigins("http://localhost:5000", "http://109.152.33.208", "https://109.152.33.208")  // specify the allowed origins here
+    .AllowAnyHeader()
+    .AllowAnyMethod());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
