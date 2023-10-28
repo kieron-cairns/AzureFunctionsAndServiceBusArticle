@@ -2,6 +2,8 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using DatabaseSaverWebAPI.Data;
 using DatabaseSaverWebAPI.Interfaces;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,10 +66,37 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler(errorApp =>
+    {
+        errorApp.Run(async context =>
+        {
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "text/html";
+
+            var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+            if (exceptionHandlerPathFeature != null)
+            {
+                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogError(exceptionHandlerPathFeature.Error, "An error occurred processing your request.");
+
+                await context.Response.WriteAsync("<h1>An error occurred while processing your request.</h1>");
+                await context.Response.WriteAsync("<p>Please try again later.</p>");
+            }
+        });
+    });
+}
+
 
 app.Run();
