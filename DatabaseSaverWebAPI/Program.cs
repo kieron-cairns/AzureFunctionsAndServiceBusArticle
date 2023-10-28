@@ -72,6 +72,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5001, listenOptions =>
+    {
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2;
+    });
+});
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -97,6 +106,7 @@ else
         });
     });
 }
+
 
 
 app.Run();
